@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Equity Pull — HELOC vs Cash-Out Refi</title>
+<meta name="description" content="Should you pull equity with a HELOC or a cash-out refinance? Real amortization math, side by side, with a plain-English verdict.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1F3522">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<style>
+:root{--green:#1F3522;--ivory:#F5F2E8;--gold:#B49A5B;--ox:#5C2A2A;--char:#2C2C2C;--line:#ddd5c0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--ivory);color:var(--char);font-family:Georgia,'Times New Roman',serif;line-height:1.55}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 90px}
+header.hero{background:var(--green);color:var(--ivory);padding:34px 20px 26px;text-align:center;border-bottom:4px solid var(--gold)}
+.hero h1{margin:0 0 8px;font-size:30px;letter-spacing:.5px}
+.hero h1 .g{color:var(--gold)}
+.hero p.sub{margin:0 auto;max-width:560px;font-size:16px;color:#e9e2cf}
+.steps{display:flex;gap:10px;margin:18px auto 0;max-width:640px}
+.step{flex:1;background:rgba(245,242,232,.07);border:1px solid var(--gold);border-radius:10px;padding:10px 8px;font-size:13px}
+.step b{display:block;color:var(--gold);font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+h2.sec{font-size:21px;margin:30px 0 4px;color:var(--green);border-bottom:2px solid var(--gold);padding-bottom:6px}
+p.lead{margin:6px 0 14px;font-size:15px}
+.card{background:#fffdf6;border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 1px 3px rgba(31,53,34,.08)}
+label{display:block;font-size:14px;margin:12px 0 4px;font-weight:bold}
+label small{font-weight:normal;color:#6b6350}
+input[type=number],input[type=text]{width:100%;padding:12px;font-size:17px;border:1px solid var(--line);border-radius:8px;background:#fff;font-family:inherit}
+input:focus{outline:2px solid var(--gold);border-color:var(--gold)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.toggle-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.pill{border:1.5px solid var(--gold);background:transparent;color:var(--green);border-radius:999px;padding:9px 16px;font-size:15px;font-family:inherit;cursor:pointer}
+.pill.on{background:var(--green);color:var(--ivory);border-color:var(--green)}
+.check{display:flex;align-items:center;gap:10px;margin:12px 0;font-size:15px}
+.check input{width:20px;height:20px;accent-color:var(--green)}
+#verdict{background:var(--green);color:var(--ivory);border-radius:12px;padding:20px;margin:22px 0;border:3px solid var(--gold)}
+#verdict h2{margin:0 0 8px;font-size:22px;color:var(--gold)}
+#verdict p{margin:6px 0;font-size:16px}
+#verdict .big{font-size:26px;font-weight:bold;color:var(--gold)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.duo .box{background:#fffdf6;border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.duo .box h3{margin:0 0 6px;font-size:15px;color:var(--green);text-transform:uppercase;letter-spacing:1px}
+.duo .box .amt{font-size:24px;font-weight:bold}
+.duo .box .note{font-size:13px;color:#6b6350}
+.bar{margin:14px 0}
+.bar .lbl{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px}
+.bar .track{background:#e7e0cd;border-radius:6px;height:26px;overflow:hidden}
+.bar .fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:12px;font-weight:bold;white-space:nowrap}
+.fill.heloc{background:var(--ox)} .fill.refi{background:var(--green)}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}
+th,td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--green)}
+.btn{display:block;width:100%;background:var(--green);color:var(--ivory);border:none;border-radius:10px;padding:15px;font-size:18px;font-family:inherit;cursor:pointer;margin:14px 0}
+.btn.gold{background:var(--gold);color:var(--green);font-weight:bold}
+.btn.ghost{background:transparent;color:var(--green);border:1.5px solid var(--green)}
+footer{margin-top:34px;font-size:13px;color:#6b6350;border-top:1px solid var(--line);padding-top:12px}
+.err{background:#f7e8e4;border:1px solid var(--ox);color:var(--ox);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:14px}
+.hint{font-size:13px;color:#6b6350;margin:4px 0 0}
+</style>
+</head>
+<body>
+<header class="hero">
+  <h1>Equity Pull <span class="g">—</span> HELOC <span class="g">vs</span> Cash-Out Refi</h1>
+  <p class="sub">You need cash out of your house. One question: is a HELOC or a cash-out refinance cheaper for <em>you</em>? This runs the real amortization math on both and declares a winner.</p>
+  <div class="steps">
+    <div class="step"><b>1 · Tell it</b>Your home, your mortgage, and how much cash you need.</div>
+    <div class="step"><b>2 · Price it</b>Enter the HELOC offer and the refi offer, side by side.</div>
+    <div class="step"><b>3 · Judge it</b>Pick a time horizon. Get monthly payments, total cost, and a verdict.</div>
+  </div>
+</header>
+<div class="wrap">
+
+<h2 class="sec">Your situation</h2>
+<p class="lead">The starting point both offers get measured against.</p>
+<div class="card">
+  <div class="row2">
+    <div><label>Home value <small>($)</small></label><input type="number" id="homeValue" value="500000" min="0" step="1000"></div>
+    <div><label>Current mortgage balance <small>($)</small></label><input type="number" id="balance" value="300000" min="0" step="1000"></div>
+  </div>
+  <div class="row2">
+    <div><label>Current rate <small>(% APR)</small></label><input type="number" id="curRate" value="6.5" min="0" max="25" step="0.125"></div>
+    <div><label>Years left on mortgage</label><input type="number" id="yearsLeft" value="27" min="1" max="40" step="1"></div>
+  </div>
+  <div><label>Cash you need to pull out <small>($)</small></label><input type="number" id="cashNeed" value="80000" min="0" step="1000"></div>
+  <p class="hint" id="ltvHint"></p>
+</div>
+
+<h2 class="sec">The HELOC offer</h2>
+<p class="lead">A second loan on top of your current mortgage. Usually interest-only for a while, then it amortizes.</p>
+<div class="card">
+  <div class="row3">
+    <div><label>HELOC rate <small>(% APR)</small></label><input type="number" id="helocRate" value="8.5" min="0" max="25" step="0.125"></div>
+    <div><label>Draw period <small>(yrs)</small></label><input type="number" id="drawYrs" value="10" min="1" max="20" step="1"></div>
+    <div><label>Repay term <small>(yrs)</small></label><input type="number" id="repayYrs" value="20" min="1" max="30" step="1"></div>
+  </div>
+  <div class="row2">
+    <div><label>Upfront fees <small>($)</small></label><input type="number" id="helocFees" value="0" min="0" step="100"></div>
+    <div><label class="check" style="margin-top:34px"><input type="checkbox" id="helocIO" checked> Interest-only during draw</label></div>
+  </div>
+</div>
+
+<h2 class="sec">The cash-out refi offer</h2>
+<p class="lead">One new first mortgage that pays off the old one <em>and</em> hands you the cash. Closing costs are the catch.</p>
+<div class="card">
+  <div class="row3">
+    <div><label>Refi rate <small>(% APR)</small></label><input type="number" id="refiRate" value="6.25" min="0" max="25" step="0.125"></div>
+    <div><label>Term <small>(yrs)</small></label><input type="number" id="refiTerm" value="30" min="1" max="40" step="1"></div>
+    <div><label>Closing costs <small>($)</small></label><input type="number" id="closing" value="9000" min="0" step="100"></div>
+  </div>
+  <label class="check"><input type="checkbox" id="rollCosts" checked> Roll closing costs into the new loan <small style="font-weight:normal">(uncheck to pay them in cash at closing)</small></label>
+</div>
+
+<h2 class="sec">Compare</h2>
+<p class="lead">How long will you actually hold this? And what if rates move?</p>
+<div class="card">
+  <label>Time horizon</label>
+  <div class="toggle-row" id="horizonRow">
+    <button class="pill" data-h="5">5 yrs</button>
+    <button class="pill" data-h="10">10 yrs</button>
+    <button class="pill on" data-h="15">15 yrs</button>
+    <button class="pill" data-h="30">30 yrs</button>
+  </div>
+  <label>Rate shock <small>— what if both offers move 1%?</small></label>
+  <div class="toggle-row" id="shockRow">
+    <button class="pill on" data-s="0">No shock</button>
+    <button class="pill" data-s="1">+1% rates</button>
+    <button class="pill" data-s="-1">−1% rates</button>
+  </div>
+</div>
+
+<button class="btn gold" id="runBtn">Run the comparison</button>
+<div id="errBox"></div>
+
+<div id="results" style="display:none">
+  <div id="verdict"></div>
+  <h2 class="sec">Monthly payments</h2>
+  <div class="duo">
+    <div class="box"><h3>HELOC path</h3><div class="amt" id="pmtHeloc">—</div><div class="note">old mortgage + HELOC</div></div>
+    <div class="box"><h3>Refi path</h3><div class="amt" id="pmtRefi">—</div><div class="note">one new mortgage</div></div>
+  </div>
+  <h2 class="sec">Total extra cost over <span id="hzLabel">15</span> years</h2>
+  <p class="lead">What pulling this cash <em>costs you</em> versus doing nothing — payments above your current mortgage, plus fees.</p>
+  <div id="bars"></div>
+  <h2 class="sec">The numbers</h2>
+  <div class="card"><table id="numTable"></table></div>
+  <h2 class="sec">Save this comparison</h2>
+  <div class="card">
+    <label>Give it a name <small>(e.g. "Maple St — March offers")</small></label>
+    <input type="text" id="saveName" placeholder="My comparison">
+    <button class="btn" id="saveBtn" style="margin-bottom:6px">Save</button>
+    <button class="btn ghost" id="loadBtn">Load a saved comparison</button>
+    <div id="savedList" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<footer>
+  <b>A word of straight talk.</b> This is math, not advice. It assumes fixed rates and on-time payments, and it ignores taxes, PMI, and the fact that HELOC rates usually float. Read your actual loan disclosures before you sign anything.
+</footer>
+</div>
+<script>
+"use strict";
+/* ---------- math ---------- */
+function pmt(principal, aprPct, years){
+  if(principal<=0||years<=0) return 0;
+  var r=aprPct/100/12, n=Math.round(years*12);
+  if(r===0) return principal/n;
+  var f=Math.pow(1+r,n);
+  return principal*r*f/(f-1);
+}
+// cumulative principal+interest paid over `months` on an amortizing loan
+function cumPaid(principal, aprPct, years, months){
+  var pay=pmt(principal,aprPct,years), r=aprPct/100/12, bal=principal, tot=0;
+  months=Math.min(months, Math.round(years*12));
+  for(var i=0;i<months;i++){
+    var interest=bal*r, pp=Math.min(pay-interest,bal);
+    if(pp<0)pp=0;
+    tot+=interest+pp; bal-=pp;
+    if(bal<=0.005){bal=0;break;}
+  }
+  return {total:tot, balance:Math.max(0,bal)};
+}
+function fmt(n){
+  var neg=n<0; n=Math.abs(Math.round(n));
+  return (neg?"-$":"$")+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",");
+}
+function num(id){ var v=parseFloat(document.getElementById(id).value); return isNaN(v)?0:v; }
+var horizon=15, shock=0;
+
+function compute(){
+  var homeValue=num("homeValue"), balance=num("balance"), curRate=num("curRate"),
+      yearsLeft=num("yearsLeft"), cashNeed=num("cashNeed"),
+      helocRate=num("helocRate")+shock, drawYrs=num("drawYrs"), repayYrs=num("repayYrs"),
+      helocFees=num("helocFees"), helocIO=document.getElementById("helocIO").checked,
+      refiRate=num("refiRate")+shock, refiTerm=num("refiTerm"), closing=num("closing"),
+      roll=document.getElementById("rollCosts").checked;
+  var H=horizon*12;
+  // old loan counterfactual
+  var oldPmt=pmt(balance,curRate,yearsLeft);
+  var oldCum=cumPaid(balance,curRate,yearsLeft,H).total;
+  // refi path
+  var refiPrincipal=balance+cashNeed+(roll?closing:0);
+  var refiPmt=pmt(refiPrincipal,refiRate,refiTerm);
+  var refiCum=cumPaid(refiPrincipal,refiRate,refiTerm,H).total+(roll?0:closing);
+  var refiExtra=refiCum-oldCum; // incremental vs doing nothing
+  // heloc path
+  var drawM=Math.round(drawYrs*12), repayM=Math.round(repayYrs*12);
+  var hr=helocRate/100/12, helocCum=helocFees, helocFirstPmt=0;
+  if(helocIO){
+    var ioPmt=cashNeed*hr; helocFirstPmt=ioPmt;
+    var ioMonths=Math.min(H,drawM);
+    helocCum+=ioPmt*ioMonths;
+    var rem=H-ioMonths;
+    if(rem>0){ // balance still = cashNeed, amortize over repay term
+      var ap=pmt(cashNeed,helocRate,repayYrs);
+      helocCum+=cumPaid(cashNeed,helocRate,repayYrs,rem).total;
+      helocFirstPmt=ioPmt; // first-year payment shown is interest-only
+    }
+  }else{
+    var totalTerm=drawYrs+repayYrs;
+    var ap2=pmt(cashNeed,helocRate,totalTerm);
+    helocFirstPmt=ap2;
+    helocCum+=cumPaid(cashNeed,helocRate,totalTerm,H).total;
+  }
+  return {
+    homeValue:homeValue,balance:balance,curRate:curRate,cashNeed:cashNeed,
+    helocRate:helocRate,refiRate:refiRate,closing:closing,roll:roll,
+    oldPmt:oldPmt,refiPmt:refiPmt,refiExtra:refiExtra,helocExtra:helocCum,
+    helocFirstPmt:helocFirstPmt,H:H
+  };
+}
+
+function breakEven(r){
+  // first month m where refi cumulative extra cost <= heloc cumulative extra cost
+  var homeValue=r.homeValue; // (recompute month-by-month)
+  var balance=num("balance"),curRate=num("curRate"),yearsLeft=num("yearsLeft"),cashNeed=num("cashNeed"),
+      helocRate=r.helocRate,drawYrs=num("drawYrs"),repayYrs=num("repayYrs"),
+      helocFees=num("helocFees"),helocIO=document.getElementById("helocIO").checked,
+      refiRate=r.refiRate,refiTerm=num("refiTerm"),closing=r.closing,roll=r.roll;
+  var refiPrincipal=balance+cashNeed+(roll?closing:0);
+  var oldP=num("balance")>0?pmt(balance,curRate,yearsLeft):0;
+  var rp=pmt(refiPrincipal,refiRate,refiTerm);
+  var hr=helocRate/100/12, drawM=Math.round(drawYrs*12);
+  var hpIO=cashNeed*hr, hpAm=pmt(cashNeed,helocRate,repayYrs);
+  var cR=roll?0:closing, cH=helocFees, found=null;
+  for(var m=1;m<=r.H;m++){
+    var oldPaid=cumPaid(balance,curRate,yearsLeft,m).total;
+    var refiPaid=cumPaid(refiPrincipal,refiRate,refiTerm,m).total+(roll?0:closing);
+    cR=refiPaid-oldPaid;
+    var hc=helocFees;
+    if(helocIO){
+      var im=Math.min(m,drawM);
+      hc+=hpIO*im;
+      if(m>drawM) hc+=cumPaid(cashNeed,helocRate,repayYrs,m-drawM).total;
+    }else{
+      hc+=cumPaid(cashNeed,helocRate,drawYrs+repayYrs,m).total;
+    }
+    cH=hc;
+    if(cR<=cH){found=m;break;}
+  }
+  return {month:found, refiEnd:cR, helocEnd:cH};
+}
+
+function render(){
+  var err=document.getElementById("errBox"); err.innerHTML="";
+  if(num("cashNeed")<=0){err.innerHTML='<div class="err">Enter the amount of cash you need to pull out.</div>';return;}
+  if(num("balance")+num("cashNeed")>num("homeValue")*0.95){
+    err.innerHTML='<div class="err">Heads up: that pushes past 95% loan-to-value. Most lenders cap you well below that.</div>';
+  }
+  var r=compute(), be=breakEven(r);
+  document.getElementById("results").style.display="block";
+  document.getElementById("hzLabel").textContent=horizon;
+  var hv=num("homeValue");
+  document.getElementById("ltvHint").textContent="After the pull, loan-to-value: "+
+    Math.round((num("balance")+num("cashNeed"))/Math.max(hv,1)*100)+"%";
+  // verdict
+  var diff=r.refiExtra-r.helocExtra, v=document.getElementById("verdict"), html="";
+  if(Math.abs(diff)<1){
+    html="<h2>It's a coin flip.</h2><p>Over "+horizon+" years both paths cost within a dollar of each other. Pick on flexibility: the HELOC lets you draw only what you need; the refi locks one payment and walks away.</p>";
+  }else if(diff>0){
+    html="<h2>Verdict: the HELOC wins.</h2><p class='big'>Saves "+fmt(diff)+" over "+horizon+" years.</p><p>"+
+      (r.closing>0&&r.roll?"The refi's closing costs get financed, so you're paying interest on your own fees — that drag never quite washes out. ":"")+
+      "No big upfront bill and interest-only payments keep the HELOC light early. The refi only makes sense here if you value one locked payment over raw cost.</p>";
+  }else{
+    html="<h2>Verdict: the cash-out refi wins.</h2><p class='big'>Saves "+fmt(-diff)+" over "+horizon+" years.</p><p>"+
+      "The lower refi rate on the <em>whole</em> balance beats the HELOC's higher rate on the new money, and it beats it by enough to swallow the closing costs. "+
+      (be.month?"The refi pulls ahead for good in month "+be.month+".":"Even with the upfront costs, the refi is ahead from day one.")+"</p>";
+  }
+  if(shock!==0) html+="<p><small>With the "+(shock>0?"+":"−")+"1% rate shock applied to both offers.</small></p>";
+  v.innerHTML=html;
+  // monthly payments
+  document.getElementById("pmtHeloc").textContent=fmt(r.oldPmt+r.helocFirstPmt);
+  document.getElementById("pmtRefi").textContent=fmt(r.refiPmt);
+  // bars
+  var mx=Math.max(r.helocExtra,r.refiExtra,1);
+  function bar(name,val,cls,extra){
+    return '<div class="bar"><div class="lbl"><b>'+name+'</b><span>'+fmt(val)+extra+'</span></div>'+
+      '<div class="track"><div class="fill '+cls+'" style="width:'+Math.max(2,val/mx*100)+'%">'+fmt(val)+'</div></div></div>';
+  }
+  document.getElementById("bars").innerHTML=
+    bar("HELOC path",r.helocExtra,"heloc"," total extra")+
+    bar("Refi path",r.refiExtra,"refi"," total extra");
+  // table
+  function row(l,a,b){return "<tr><td>"+l+"</td><td>"+a+"</td><td>"+b+"</td></tr>";}
+  document.getElementById("numTable").innerHTML=
+    "<tr><th></th><th>HELOC</th><th>Refi</th></tr>"+
+    row("New borrowing rate",r.helocRate.toFixed(3)+"%",r.refiRate.toFixed(3)+"%")+
+    row("Upfront cost",fmt(num("helocFees")),fmt(r.roll?0:r.closing)+(r.roll?" (rolled in)":" (cash)"))+
+    row("Payment, year 1",fmt(r.oldPmt+r.helocFirstPmt)+" /mo",fmt(r.refiPmt)+" /mo")+
+    row("Extra cost, "+horizon+" yrs",fmt(r.helocExtra),fmt(r.refiExtra))+
+    row("Break-even",be.month?("month "+be.month):"—","—");
+  document.getElementById("results").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* ---------- controls ---------- */
+function pills(id,fn){
+  var row=document.getElementById(id);
+  row.addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b)return;
+    row.querySelectorAll("button").forEach(function(x){x.classList.remove("on");});
+    b.classList.add("on"); fn(b);
+  });
+}
+pills("horizonRow",function(b){horizon=parseInt(b.dataset.h,10);});
+pills("shockRow",function(b){shock=parseFloat(b.dataset.s);});
+document.getElementById("runBtn").addEventListener("click",render);
+["homeValue","balance","curRate","yearsLeft","cashNeed","helocRate","drawYrs","repayYrs",
+ "helocFees","refiRate","refiTerm","closing"].forEach(function(id){
+  document.getElementById(id).addEventListener("input",function(){
+    if(document.getElementById("results").style.display!=="none")render();
+  });
+});
+["helocIO","rollCosts"].forEach(function(id){
+  document.getElementById(id).addEventListener("change",function(){
+    if(document.getElementById("results").style.display!=="none")render();
+  });
+});
+
+/* ---------- save / load ---------- */
+var FIELDS=["homeValue","balance","curRate","yearsLeft","cashNeed","helocRate","drawYrs","repayYrs",
+  "helocFees","helocIO","refiRate","refiTerm","closing","rollCosts"];
+function getStore(){try{return JSON.parse(localStorage.getItem("equityPull.saved")||"{}");}catch(e){return{};}}
+function snapshot(){
+  var o={horizon:horizon,shock:shock};
+  FIELDS.forEach(function(id){
+    var el=document.getElementById(id);
+    o[id]=el.type==="checkbox"?el.checked:el.value;
+  });
+  return o;
+}
+function apply(o){
+  FIELDS.forEach(function(id){
+    if(o[id]===undefined)return;
+    var el=document.getElementById(id);
+    if(el.type==="checkbox")el.checked=!!o[id];else el.value=o[id];
+  });
+  if(o.horizon){horizon=o.horizon;shock=o.shock||0;
+    document.querySelectorAll("#horizonRow button").forEach(function(b){b.classList.toggle("on",parseInt(b.dataset.h,10)===horizon);});
+    document.querySelectorAll("#shockRow button").forEach(function(b){b.classList.toggle("on",parseFloat(b.dataset.s)===shock);});
+  }
+}
+function refreshSaved(){
+  var s=getStore(), box=document.getElementById("savedList"), names=Object.keys(s);
+  box.innerHTML=names.length?names.map(function(n){
+    return '<div style="display:flex;gap:8px;margin:6px 0"><span style="flex:1;padding:9px 0">'+n.replace(/</g,"&lt;")+'</span>'+
+    '<button class="pill" data-load="'+n.replace(/"/g,"&quot;")+'">Load</button>'+
+    '<button class="pill" data-del="'+n.replace(/"/g,"&quot;")+'">Delete</button></div>';
+  }).join(""):'<p class="hint">Nothing saved yet.</p>';
+  box.querySelectorAll("[data-load]").forEach(function(b){
+    b.addEventListener("click",function(){apply(getStore()[b.dataset.load]);render();});
+  });
+  box.querySelectorAll("[data-del]").forEach(function(b){
+    b.addEventListener("click",function(){var s=getStore();delete s[b.dataset.del];
+      localStorage.setItem("equityPull.saved",JSON.stringify(s));refreshSaved();});
+  });
+}
+document.getElementById("saveBtn").addEventListener("click",function(){
+  var n=document.getElementById("saveName").value.trim()||"My comparison";
+  var s=getStore(); s[n]=snapshot();
+  localStorage.setItem("equityPull.saved",JSON.stringify(s));
+  refreshSaved(); document.getElementById("saveName").value="";
+});
+document.getElementById("loadBtn").addEventListener("click",function(){
+  var r=document.getElementById("results"); r.style.display="block"; refreshSaved();
+  r.scrollIntoView({behavior:"smooth"});
+});
+refreshSaved();
+
+/* ---------- PWA ---------- */
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){});}
+</script>
+</body>
+</html>
